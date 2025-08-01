@@ -159,49 +159,6 @@ class MistralModel(LMMBaseModel):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
 
-class CogBiasModel(LMMBaseModel):
-    """
-    Language model class for the CogBias model.
-
-    Inherits from LMMBaseModel and sets up the CogBias language model for use.
-
-    Parameters:
-    -----------
-    model : str
-        The name of the CogBias model.
-    max_new_tokens : int
-        The maximum number of new tokens to be generated.
-    temperature : float
-        The temperature for text generation (default is 0).
-    device: str
-        The device to use for inference (default is 'auto').
-    dtype: str
-        The dtype to use for inference (default is 'auto').
-    """
-    def __init__(self, model_name, max_new_tokens, temperature, device, dtype):
-        super(CogBiasModel, self).__init__(model_name, max_new_tokens, temperature, device)
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
-        self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
-
-
-    def predict(self, input_text, **kwargs):
-        if self.device == 'auto':
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        else:
-            device = self.device
-        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-
-        outputs = self.model.generate(input_ids, 
-                                     max_new_tokens=self.max_new_tokens, 
-                                     temperature=self.temperature,
-                                     **kwargs)
-        
-        out = self.tokenizer.decode(outputs[0])
-        return out[len(input_text):]
-
 
 class PhiModel(LMMBaseModel):
     """
@@ -298,6 +255,60 @@ class UL2Model(LMMBaseModel):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
         self.model = T5ForConditionalGeneration.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+
+
+class CogBiasModel(LMMBaseModel):
+    """
+    Language model class for the CogBias model.
+
+    Inherits from LMMBaseModel and sets up the CogBias language model for use.
+
+    Parameters:
+    -----------
+    model : str
+        The name of the CogBias model.
+    max_new_tokens : int
+        The maximum number of new tokens to be generated.
+    temperature : float
+        The temperature for text generation (default is 0).
+    device: str
+        The device to use for inference (default is 'auto').
+    dtype: str
+        The dtype to use for inference (default is 'auto').
+    """
+    def __init__(self, model_name, max_new_tokens, temperature, device, dtype, system_prompt, model_dir):
+        super(LlamaModel, self).__init__(model_name, max_new_tokens, temperature, device)
+        if system_prompt is None:
+            self.system_prompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."
+        else:
+            self.system_prompt = system_prompt
+            
+        from transformers import AutoTokenizer, AutoModelForCausalLM
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+        self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
+
+
+    def predict(self, input_text, **kwargs):
+        if self.device == 'auto':
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        else:
+            device = self.device
+        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
+
+        input_text = f"<s>[INST] <<SYS>>{self.system_prompt}<</SYS>>\n{input_text}[/INST]"
+        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
+        
+        outputs = self.model.generate(input_ids, 
+                                     max_new_tokens=self.max_new_tokens, 
+                                     temperature=self.temperature,
+                                     **kwargs)
+        
+        out = self.tokenizer.decode(outputs[0], 
+                                    skip_special_tokens=True, 
+                                    clean_up_tokenization_spaces=False)
+        
+        return out[len(input_text):]
 
 
 class LlamaModel(LMMBaseModel):

@@ -7,7 +7,7 @@ from .models import *
 MODEL_LIST = {
     T5Model: ['google/flan-t5-large'],
     LlamaModel: ['llama2-7b', 'llama2-7b-chat', 'llama2-13b', 'llama2-13b-chat', 'llama2-70b', 'llama2-70b-chat',],
-    CogBiasModel: ['XiWangEric/literary-classicist-llama3', 'XiWangEric/inventive_technologist-llama3', 'XiWangEric/patent_strategist-llama3', 
+    CogBiasModel: ['meta-llama/Meta-Llama-3-8B', 'XiWangEric/literary-classicist-llama3', 'XiWangEric/inventive_technologist-llama3', 'XiWangEric/patent_strategist-llama3', 
     'XiWangEric/cultural_scholar-llama3', 'XiWangEric/technical_communicator-llama3', 'XiWangEric/business_advisor-llama3', 'XiWangEric/health_advisor-llama3', 
     'XiWangEric/scientific_scholar-llama3', 'XiWangEric/scientific_mathematician-llama3', 'XiWangEric/legal_analyst-llama3', 'XiWangEric/biomedical_expert-llama3'],
     PhiModel: ['phi-1.5', 'phi-2'],
