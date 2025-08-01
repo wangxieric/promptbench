@@ -184,6 +184,8 @@ class CogBiasModel(LMMBaseModel):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+        self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
+
 
     def predict(self, input_text, **kwargs):
         if self.device == 'auto':
