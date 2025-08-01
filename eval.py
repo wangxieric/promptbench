@@ -9,7 +9,7 @@ print('All supported models: ')
 print(pb.SUPPORTED_MODELS)
 
 # load a model, flan-t5-large, for instance.
-model = pb.LLMModel(model='meta-llama/Meta-Llama-3-8B', max_new_tokens=10, temperature=0.0001, device='cuda')
+model = pb.LLMModel(model='google/flan-t5-large', max_new_tokens=10, temperature=0.0001, device='cuda')
 # Prompt API supports a list, so you can pass multiple prompts at once.
 prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
                      "Determine the emotion of the following sentence as positive or negative: {content}"
