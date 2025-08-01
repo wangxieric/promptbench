@@ -1,7 +1,7 @@
 import promptbench as pb
 print('All supported datasets: ')
 print(pb.SUPPORTED_DATASETS)
-dataset = pb.DatasetLoader.load_dataset("sst2")
+dataset = pb.DatasetLoader.load_dataset("mmlu")
 dataset[:5]
 
 # print all supported models in promptbench
@@ -10,7 +10,7 @@ print(pb.SUPPORTED_MODELS)
 
 # load a model, flan-t5-large, for instance.
 # model = pb.LLMModel(model='google/flan-t5-large', max_new_tokens=10, temperature=0.0001, device='cuda')
-model = pb.LLMModel(model='llama2-7b-chat', max_new_tokens=10, temperature=0.0001)
+model = pb.LLMModel(model='XiWangEric/literary-classicist-llama3', max_new_tokens=10, temperature=0.0001)
 # Prompt API supports a list, so you can pass multiple prompts at once.
 prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
                      "Determine the emotion of the following sentence as positive or negative: {content}"
