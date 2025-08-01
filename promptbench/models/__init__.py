@@ -7,6 +7,9 @@ from .models import *
 MODEL_LIST = {
     T5Model: ['google/flan-t5-large'],
     LlamaModel: ['llama2-7b', 'llama2-7b-chat', 'llama2-13b', 'llama2-13b-chat', 'llama2-70b', 'llama2-70b-chat',],
+    CogbiasModel: ['XiWangEric/literary-classicist-llama3', 'XiWangEric/inventive_technologist-llama3', 'XiWangEric/patent_strategist-llama3', 
+    'XiWangEric/cultural_scholar-llama3', 'XiWangEric/technical_communicator-llama3', 'XiWangEric/business_advisor-llama3', 'XiWangEric/health_advisor-llama3', 
+    'XiWangEric/scientific_scholar-llama3', 'XiWangEric/scientific_mathematician-llama3', 'XiWangEric/legal_analyst-llama3', 'XiWangEric/biomedical_expert-llama3']
     PhiModel: ['phi-1.5', 'phi-2'],
     PaLMModel: ['palm'],
     OpenAIModel: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-1106-preview', 'gpt-3.5-turbo-1106', 'gpt-4-0125-preview', 'gpt-3.5-turbo-0125', 'gpt-4-turbo', 'gpt-4o'],

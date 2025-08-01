@@ -159,6 +159,47 @@ class MistralModel(LMMBaseModel):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
 
+class CogBiasModel(LMMBaseModel):
+    """
+    Language model class for the CogBias model.
+
+    Inherits from LMMBaseModel and sets up the CogBias language model for use.
+
+    Parameters:
+    -----------
+    model : str
+        The name of the CogBias model.
+    max_new_tokens : int
+        The maximum number of new tokens to be generated.
+    temperature : float
+        The temperature for text generation (default is 0).
+    device: str
+        The device to use for inference (default is 'auto').
+    dtype: str
+        The dtype to use for inference (default is 'auto').
+    """
+    def __init__(self, model_name, max_new_tokens, temperature, device, dtype):
+        super(CogBiasModel, self).__init__(model_name, max_new_tokens, temperature, device)
+        from transformers import AutoTokenizer, AutoModelForCausalLM
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+
+    def predict(self, input_text, **kwargs):
+        if self.device == 'auto':
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        else:
+            device = self.device
+        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
+
+        outputs = self.model.generate(input_ids, 
+                                     max_new_tokens=self.max_new_tokens, 
+                                     temperature=self.temperature,
+                                     **kwargs)
+        
+        out = self.tokenizer.decode(outputs[0])
+        return out[len(input_text):]
+
 
 class PhiModel(LMMBaseModel):
     """
