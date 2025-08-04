@@ -7,18 +7,20 @@ print("Dataset loaded:", dataset[:5])
 model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
 
 prompts = pb.Prompt([
-    "Classify the sentence as either 'positive' or 'negative': {content}\nAnswer:",
-    "Label the sentiment of the following sentence. Respond only with 'positive' or 'negative': {content}\nSentiment:",
-    "If I classify the sentence {content} as positive or negative, the answer will be:",
-    "Decide if the sentiment of this sentence is positive or negative. Just reply 'positive' or 'negative': {content}",
-    "Instruction: Respond with only 'positive' or 'negative'. Sentence: {content}\nAnswer:"
+    "Instruction: Respond with only 'positive' or 'negative'. Sentence: {content}\nAnswer:",
+    "Label the sentiment of the following sentence. Only say 'positive' or 'negative': {content}\nSentiment:",
+    "Sentence: {content}\nRespond with one word only (positive or negative):"
 ])
 
 def proj_func(pred):
     pred = pred.strip().lower()
-    if "positive" in pred:
+    if 'positive' in pred:
         return 1
-    elif "negative" in pred:
+    elif 'negative' in pred:
+        return 0
+    elif 'ositive' in pred:  # for common truncations
+        return 1
+    elif 'gative' in pred or 'tive' in pred:
         return 0
     else:
         return -1
