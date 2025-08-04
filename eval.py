@@ -17,10 +17,17 @@ outputs = model(prompt)
 print("=== Generated Text ===")
 print(outputs)
 
-
-prompt = "Sentence: I love programming!\nSentiment:"
-output = model(prompt)
-print("=>", output)
+print("=== Generated Text ===")
+prompts = [
+    "I love programming! This means the sentiment is",
+    "The movie was terrible. The sentiment is",
+    "She enjoyed every moment of the concert. Sentiment:",
+    "I hated that book. Sentiment:"
+]
+for p in prompts:
+    print("Prompt:", p)
+    print("Output:", model(p))
+    print("------")
 
 # prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
 #                      "Determine the emotion of the following sentence as positive or negative: {content}"
