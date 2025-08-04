@@ -35,7 +35,7 @@ for prompt in prompts:
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
-        logits = model(input_text, output_logits=True)[0, -1]
+        logits = model.predict_logits(input_text, output_logits=True)[0, -1]
         print(logits)
         # pred = int(probs[0] > probs[1])  # 0 for negative, 1 for positive
         # preds.append(pred)
