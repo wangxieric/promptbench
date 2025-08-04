@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 dataset = pb.DatasetLoader.load_dataset("sst2")
 print("dataset loaded:", dataset[:5])
 
-model = pb.LLMModel("XiWangEric/literary-classicist-llama3", max_new_tokens=10, temperature=0.0001, device='cuda')
+model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
 prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
 outputs = model(prompt)
 
