@@ -2,7 +2,7 @@ import promptbench as pb
 print('All supported datasets: ')
 print(pb.SUPPORTED_DATASETS)
 dataset = pb.DatasetLoader.load_dataset("sst2")
-dataset[:5]
+print('dataset samples: ', dataset[:5])
 
 # print all supported models in promptbench
 print('All supported models: ')
