@@ -20,11 +20,13 @@ prompts = pb.Prompt([
 ])
 
 def proj_func(pred):
-    mapping = {
-        "positive": 1,
-        "negative": 0
-    }
-    return mapping.get(pred, -1)
+    pred = pred.strip().lower()
+    if "positive" in pred:
+        return 1
+    elif "negative" in pred:
+        return 0
+    else:
+        return -1
 
 from tqdm import tqdm
 for prompt in prompts:
