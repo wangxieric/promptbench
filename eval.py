@@ -28,17 +28,24 @@ for prompt in prompts:
     preds = []
     labels = []
     raw_preds = []
+    input_texts = []
     for data in tqdm(dataset):
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
-        raw_pred = model(input_text)
+        input_texts.append(input_text)
+        input_ids = model.tokenizer(input_text, return_tensors="pt").input_ids.to(model.device)
+        
+        # get raw prediction
+        raw_pred = model(input_ids)
+
         raw_preds.append(raw_pred)
         # process output
         pred = pb.OutputProcess.cls(raw_pred, proj_func)
         preds.append(pred)
         labels.append(label)
-    
+
+    print("input texts:", input_texts)    
     print("predictions:", preds)
     print("labels:", labels)
     print("raw predictions:", raw_preds)
