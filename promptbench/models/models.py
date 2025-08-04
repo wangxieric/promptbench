@@ -278,7 +278,7 @@ class CogBiasModel(LMMBaseModel):
     system_prompt : str
         Optional system prompt for LLaMA-style models.
     """
-    def __init__(self, model_name, max_new_tokens, temperature, device, dtype, system_prompt=None):
+    def __init__(self, model_name, max_new_tokens, temperature, device, dtype, system_prompt=None, wrap_syspt=False):
         super(CogBiasModel, self).__init__(model_name, max_new_tokens, temperature, device)
         
         self.system_prompt = system_prompt or (
@@ -289,6 +289,7 @@ class CogBiasModel(LMMBaseModel):
             "a question, please do not share false information."
         )
 
+        self.wrap_syspt = wrap_syspt
         from transformers import AutoTokenizer, AutoModelForCausalLM
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, torch_dtype=dtype, device_map=device)
         self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=dtype, device_map=device)
@@ -302,9 +303,12 @@ class CogBiasModel(LMMBaseModel):
 
     def predict(self, input_text, **kwargs):
         device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
-
-        # wrapped_prompt = self._wrap_prompt(input_text)
-        wrapped_prompt = input_text
+        if self.wrap_syspt:
+            # Wrap the input text with the system prompt
+            wrapped_prompt = self._wrap_prompt(input_text)
+        else:
+            wrapped_prompt = input_text
+            
         input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
 
         outputs = self.model.generate(
