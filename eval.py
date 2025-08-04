@@ -17,7 +17,7 @@ model = pb.LLMModel(
 )
 
 # Use correct placeholder for SST-2 data
-prompts = pb.Prompt(["Classify the sentiment of the following sentence as positive or negative: {sentence}"])
+prompts = pb.Prompt(["Classify the sentiment of the following sentence as positive or negative: {context}"])
 
 print("test prompt output: ", model("What is the sentiment of the sentence: 'It was a great movie.'"))
 
