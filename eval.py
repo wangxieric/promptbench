@@ -8,24 +8,9 @@ print("Dataset loaded:", dataset[:5])
 model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
 
-prompts = pb.Prompt([
-    "Instruction: Respond with only 'positive' or 'negative'. Sentence: {content}\nAnswer:",
-    "Label the sentiment of the following sentence. Only say 'positive' or 'negative': {content}\nSentiment:",
-    "Sentence: {content}\nRespond with one word only (positive or negative):"
-])
-
-def proj_func(pred):
-    pred = pred.strip().lower()
-    if 'positive' in pred:
-        return 1
-    elif 'negative' in pred:
-        return 0
-    elif 'ositive' in pred:  # for common truncations
-        return 1
-    elif 'gative' in pred or 'tive' in pred:
-        return 0
-    else:
-        return -1
+prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
+                     "Determine the emotion of the following sentence as positive or negative: {content}"
+                     ])
 
 from tqdm import tqdm
 for prompt in prompts:
@@ -39,7 +24,7 @@ for prompt in prompts:
         logits = model(input_text, output_logits=True)[0, -1]
         label_ids = [tokenizer(label).input_ids[-1] for label in ["positive", "negative"]]
         probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in label_ids]), dim=0)
-        pred = int(probs[0] > probs[1])
+        pred = int(probs[0] > probs[1]) # 0 for negative, 1 for positive
         preds.append(pred)
         labels.append(label)
     # print(raw_preds[:5])
