@@ -12,8 +12,7 @@ print(pb.SUPPORTED_MODELS)
 # model = pb.LLMModel(model='google/flan-t5-large', max_new_tokens=10, temperature=0.0001, device='cuda')
 model = pb.LLMModel(model='XiWangEric/literary-classicist-llama3', max_new_tokens=10, temperature=0.0001)
 # Prompt API supports a list, so you can pass multiple prompts at once.
-prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
-                     "Determine the emotion of the following sentence as positive or negative: {content}"
+prompts = pb.Prompt(["Classify the sentiment of the following sentence as positive or negative: {content}"
                      ])
 
 def proj_func(pred):
