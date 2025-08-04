@@ -12,7 +12,7 @@ print(model("Once upon a time, there was a lonely dragon who"))
 
 # Example 2: Prompt with answer template (no [INST] tags)
 print("\n=== Sentiment prompt ===")
-print(model("Classify the sentence as positive or negative: I love programming. Sentiment:"))
+print(model("If I classify the sentence 'I love programming' as positive or negative, the answer will be:"))
 
 # import torch
 # import promptbench as pb
