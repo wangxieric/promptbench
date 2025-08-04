@@ -14,7 +14,7 @@ model = pb.LLMModel(model='XiWangEric/literary-classicist-llama3', max_new_token
 # Prompt API supports a list, so you can pass multiple prompts at once.
 prompts = pb.Prompt(["Classify the sentiment of the following sentence as positive or negative: {content}"])
 
-print("test example ", model("Hello!"))
+print(model("What is the sentiment of this sentence: 'It was a great movie.'"))
 
 def proj_func(pred):
     mapping = {
@@ -33,22 +33,15 @@ for prompt in prompts:
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
-        input_texts.append(input_text)
-        input_ids = model.tokenizer(input_text, return_tensors="pt").input_ids.to(model.device)
-        
-        # get raw prediction
-        raw_pred = model(input_ids)
-
-        raw_preds.append(raw_pred)
+        raw_pred = model(input_text)
         # process output
         pred = pb.OutputProcess.cls(raw_pred, proj_func)
         preds.append(pred)
         labels.append(label)
 
-    print("input texts:", input_texts)    
     print("predictions:", preds)
     print("labels:", labels)
-    print("raw predictions:", raw_preds)
+    # print("raw predictions:", raw_preds)
 
     # evaluate
     score = pb.Eval.compute_cls_accuracy(preds, labels)

@@ -296,21 +296,30 @@ class CogBiasModel(LMMBaseModel):
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
         else:
             device = self.device
-        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
 
-        input_text = f"<s>[INST] <<SYS>>{self.system_prompt}<</SYS>>\n{input_text}[/INST]"
-        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-        
-        outputs = self.model.generate(input_ids, 
-                                     max_new_tokens=self.max_new_tokens, 
-                                     temperature=self.temperature,
-                                     **kwargs)
-        
-        out = self.tokenizer.decode(outputs[0], 
-                                    skip_special_tokens=True, 
-                                    clean_up_tokenization_spaces=False)
-        
-        return out[len(input_text):]
+        # Wrap in LLaMA-style prompt if needed
+        input_text_wrapped = f"<s>[INST] <<SYS>>{self.system_prompt}<</SYS>>\n{input_text} [/INST]"
+
+        input_ids = self.tokenizer(input_text_wrapped, return_tensors="pt").input_ids.to(device)
+
+        outputs = self.model.generate(
+            input_ids,
+            max_new_tokens=self.max_new_tokens,
+            temperature=self.temperature,
+            **kwargs
+        )
+
+        out = self.tokenizer.decode(
+            outputs[0],
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False
+        )
+
+        # Naively strip the instruction if it was copied
+        if out.startswith(input_text_wrapped):
+            out = out[len(input_text_wrapped):].strip()
+
+        return out.strip()
 
 
 class LlamaModel(LMMBaseModel):
