@@ -10,7 +10,7 @@ print(pb.SUPPORTED_MODELS)
 
 # load a model, e.g., literary-classicist-llama3 with improved settings
 model = pb.LLMModel(
-    model_name='XiWangEric/literary-classicist-llama3',
+    model='XiWangEric/literary-classicist-llama3',
     max_new_tokens=50,
     temperature=0.1
     )
