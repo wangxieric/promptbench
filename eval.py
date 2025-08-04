@@ -6,6 +6,7 @@ dataset = pb.DatasetLoader.load_dataset("sst2")
 print("Dataset loaded:", dataset[:5])
 
 model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
 
 prompts = pb.Prompt([
     "Instruction: Respond with only 'positive' or 'negative'. Sentence: {content}\nAnswer:",
@@ -36,17 +37,17 @@ for prompt in prompts:
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
         logits = model(input_text, output_logits=True)[0, -1]
-        print(logits)
-        # pred = int(probs[0] > probs[1])  # 0 for negative, 1 for positive
-        # preds.append(pred)
-        # labels.append(label)
-        break
+        label_ids = [tokenizer(label).input_ids[-1] for label in ["positive", "negative"]]
+        probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in label_ids]), dim=0)
+        pred = int(probs[0] > probs[1])
+        preds.append(pred)
+        labels.append(label)
     # print(raw_preds[:5])
     # print(preds[:5])
     # print(labels[:5])
     # # # evaluate
-    # score = pb.Eval.compute_cls_accuracy(preds, labels)
-    # print(f"{score:.3f}, {prompt}")
+    score = pb.Eval.compute_cls_accuracy(preds, labels)
+    print(f"{score:.3f}, {prompt}")
 
 
 
