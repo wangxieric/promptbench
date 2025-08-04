@@ -1,6 +1,10 @@
 import promptbench as pb
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+import gc
+from tqdm import tqdm
+from accelerate import Accelerator
+accelerator = Accelerator()
 
 dataset = pb.DatasetLoader.load_dataset("sst2")
 print("Dataset loaded:", dataset[:5])
@@ -30,7 +34,6 @@ for model_name in model_names:
         "Input: {content}\nSentiment (positive or negative):"
     ])
 
-    from tqdm import tqdm
     for prompt in prompts:
         preds = []
         labels = []
@@ -39,15 +42,13 @@ for model_name in model_names:
             # process input
             input_text = pb.InputProcess.basic_format(prompt, data)
             label = data['label']
-            logits = model(input_text, output_logits=True)[0, -1]
-            label_ids = [tokenizer(label).input_ids[-1] for label in ["positive", "negative"]]
-            probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in label_ids]), dim=0)
-            pred = int(probs[0] > probs[1]) # 0 for negative, 1 for positive
+            with torch.no_grad():
+                logits = model(input_text, output_logits=True)[0, -1]
+                label_ids = [tokenizer(label).input_ids[-1] for label in ["positive", "negative"]]
+                probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in label_ids]), dim=0)
+                pred = int(probs[0] > probs[1]) # 0 for negative, 1 for positive
             preds.append(pred)
             labels.append(label)
-        # print(raw_preds[:5])
-        # print(preds[:5])
-        # print(labels[:5])
         # # # evaluate
         score = pb.Eval.compute_cls_accuracy(preds, labels)
         print(f"{score:.3f}, {prompt}")
@@ -56,8 +57,8 @@ for model_name in model_names:
     del model
     del tokenizer
     torch.cuda.empty_cache()
-    import gc
     gc.collect()
+    accelerator.free_memory()
 
 # Example 1: Plain language continuation
 # print("=== Story prompt ===")
