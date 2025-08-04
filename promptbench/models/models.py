@@ -328,26 +328,26 @@ class CogBiasModel(LMMBaseModel):
 
             return out[len(wrapped_prompt):].strip()
 
-    @torch.no_grad()
-    def predict_logits(self, input_text, target_tokens=("positive", "negative")):
-        """
-        Predict the class (e.g. sentiment) based on final token logits.
+    # @torch.no_grad()
+    # def predict_logits(self, input_text, target_tokens=("positive", "negative")):
+    #     """
+    #     Predict the class (e.g. sentiment) based on final token logits.
 
-        Returns:
-        --------
-        pred: int (index of max probability)
-        probs: list of floats
-        """
-        device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
-        wrapped_prompt = self._wrap_prompt(input_text)
+    #     Returns:
+    #     --------
+    #     pred: int (index of max probability)
+    #     probs: list of floats
+    #     """
+    #     device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
+    #     wrapped_prompt = self._wrap_prompt(input_text)
 
-        input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
-        logits = self.model(input_ids=input_ids).logits[0, -1]
+    #     input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
+    #     logits = self.model(input_ids=input_ids).logits[0, -1]
 
-        token_ids = [self.tokenizer(t).input_ids[-1] for t in target_tokens]
-        probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in token_ids]), dim=0)
+    #     token_ids = [self.tokenizer(t).input_ids[-1] for t in target_tokens]
+    #     probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in token_ids]), dim=0)
 
-        return int(torch.argmax(probs).item()), probs.tolist()
+    #     return int(torch.argmax(probs).item()), probs.tolist()
 
 
 class LlamaModel(LMMBaseModel):
