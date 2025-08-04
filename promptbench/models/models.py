@@ -265,42 +265,46 @@ class CogBiasModel(LMMBaseModel):
 
     Parameters:
     -----------
-    model : str
+    model_name : str
         The name of the CogBias model.
     max_new_tokens : int
         The maximum number of new tokens to be generated.
     temperature : float
-        The temperature for text generation (default is 0).
-    device: str
-        The device to use for inference (default is 'auto').
-    dtype: str
-        The dtype to use for inference (default is 'auto').
+        The temperature for text generation.
+    device : str
+        The device to use for inference.
+    dtype : torch.dtype
+        The dtype to use for inference.
+    system_prompt : str
+        Optional system prompt for LLaMA-style models.
     """
     def __init__(self, model_name, max_new_tokens, temperature, device, dtype, system_prompt=None):
         super(CogBiasModel, self).__init__(model_name, max_new_tokens, temperature, device)
-        if system_prompt is None:
-            self.system_prompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."
-        else:
-            self.system_prompt = system_prompt
-            
+        
+        self.system_prompt = system_prompt or (
+            "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
+            "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
+            "Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, "
+            "or is not factually coherent, explain why instead of answering something not correct. If you do not know the answer to "
+            "a question, please do not share false information."
+        )
+
         from transformers import AutoTokenizer, AutoModelForCausalLM
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype, device_map=device)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, torch_dtype=dtype, device_map=device)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=dtype, device_map=device)
+
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
 
+    def _wrap_prompt(self, user_prompt: str) -> str:
+        return f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n{user_prompt} [/INST]"
 
     def predict(self, input_text, **kwargs):
-        if self.device == 'auto':
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        else:
-            device = self.device
+        device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
 
-        # Wrap in LLaMA-style prompt if needed
-        input_text_wrapped = f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n{input_text} [/INST]"
-
-        input_ids = self.tokenizer(input_text_wrapped, return_tensors="pt").input_ids.to(device)
+        wrapped_prompt = self._wrap_prompt(input_text)
+        input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
 
         outputs = self.model.generate(
             input_ids,
@@ -315,11 +319,28 @@ class CogBiasModel(LMMBaseModel):
             clean_up_tokenization_spaces=False
         )
 
-        # Naively strip the instruction if it was copied
-        if out.startswith(input_text_wrapped):
-            out = out[len(input_text_wrapped):].strip()
+        return out[len(wrapped_prompt):].strip()
 
-        return out.strip()
+    @torch.no_grad()
+    def predict_logits(self, input_text, target_tokens=("positive", "negative")):
+        """
+        Predict the class (e.g. sentiment) based on final token logits.
+
+        Returns:
+        --------
+        pred: int (index of max probability)
+        probs: list of floats
+        """
+        device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
+        wrapped_prompt = self._wrap_prompt(input_text)
+
+        input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
+        logits = self.model(input_ids=input_ids).logits[0, -1]
+
+        token_ids = [self.tokenizer(t).input_ids[-1] for t in target_tokens]
+        probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in token_ids]), dim=0)
+
+        return int(torch.argmax(probs).item()), probs.tolist()
 
 
 class LlamaModel(LMMBaseModel):
