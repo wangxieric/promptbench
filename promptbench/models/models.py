@@ -303,7 +303,8 @@ class CogBiasModel(LMMBaseModel):
     def predict(self, input_text, **kwargs):
         device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
 
-        wrapped_prompt = self._wrap_prompt(input_text)
+        # wrapped_prompt = self._wrap_prompt(input_text)
+        wrapped_prompt = input_text
         input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
 
         outputs = self.model.generate(
@@ -315,8 +316,7 @@ class CogBiasModel(LMMBaseModel):
 
         out = self.tokenizer.decode(
             outputs[0],
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=False
+            skip_special_tokens=True
         )
 
         return out[len(wrapped_prompt):].strip()
