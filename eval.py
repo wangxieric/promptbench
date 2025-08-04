@@ -19,11 +19,12 @@ print(outputs)
 
 print("=== Generated Text ===")
 prompts = [
-    "I love programming! This means the sentiment is",
-    "The movie was terrible. The sentiment is",
-    "She enjoyed every moment of the concert. Sentiment:",
-    "I hated that book. Sentiment:"
+    "<s>[INST] Classify the sentiment of this sentence: 'I love programming!' [/INST]",
+    "<s>[INST] Classify the sentiment of this sentence: 'The movie was terrible.' [/INST]",
+    "<s>[INST] Sentiment of 'She enjoyed every moment of the concert.'? [/INST]",
+    "<s>[INST] Sentiment of 'I hated that book.'? [/INST]"
 ]
+
 for p in prompts:
     print("Prompt:", p)
     print("Output:", model(p))
