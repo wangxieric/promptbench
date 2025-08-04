@@ -12,7 +12,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # )
 # model.eval()
 
-model = pb.load_model("XiWangEric/literary-classicist-llama3")
+model = pb.LLMModel("XiWangEric/literary-classicist-llama3", max_new_tokens=10, temperature=0.0001, device='cuda')
 prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
 outputs = model(prompt)
 print("=== Generated Text ===")
