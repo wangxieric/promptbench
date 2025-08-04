@@ -1,32 +1,18 @@
-import torch
+import promptbench as pb
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model_name = "meta-llama/Meta-Llama-3-8B"
+model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
+prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
+outputs = model(prompt)
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto")
-model.eval()
-
-def generate(prompt, max_new_tokens=30, temperature=0.7):
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_new_tokens,
-        temperature=temperature,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id  # important for avoiding warning
-    )
-    decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return decoded[len(prompt):].strip()
 
 # Example 1: Plain language continuation
 print("=== Story prompt ===")
-print(generate("Once upon a time, there was a lonely dragon who"))
+print(model("Once upon a time, there was a lonely dragon who"))
 
 # Example 2: Prompt with answer template (no [INST] tags)
 print("\n=== Sentiment prompt ===")
-print(generate("Classify the sentence as positive or negative: I love programming. Sentiment:"))
+print(model("Classify the sentence as positive or negative: I love programming. Sentiment:"))
 
 # import torch
 # import promptbench as pb
