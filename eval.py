@@ -1,5 +1,6 @@
 import promptbench as pb
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
 dataset = pb.DatasetLoader.load_dataset("sst2")
 print("Dataset loaded:", dataset[:5])
@@ -34,17 +35,17 @@ for prompt in prompts:
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
-        raw_pred = model(input_text)
-        raw_preds.append(raw_pred)
-        # process output
-        pred = pb.OutputProcess.cls(raw_pred, proj_func)
+        label_ids = [model.tokenizer(label).input_ids[-1] for label in ["positive", "negative"]]
+        logits = model(input_text, output_logits=True)[0, -1]
+        probs = torch.nn.functional.softmax(torch.tensor([logits[i] for i in label_ids]), dim=0)
+        pred = int(probs[0] > probs[1])  # 0 for negative, 1 for positive
         preds.append(pred)
         labels.append(label)
     
-    print(raw_preds[:5])
+    # print(raw_preds[:5])
     print(preds[:5])
     print(labels[:5])
-    # evaluate
+    # # evaluate
     score = pb.Eval.compute_cls_accuracy(preds, labels)
     print(f"{score:.3f}, {prompt}")
 

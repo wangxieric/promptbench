@@ -301,7 +301,7 @@ class CogBiasModel(LMMBaseModel):
     def _wrap_prompt(self, user_prompt: str) -> str:
         return f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n{user_prompt} [/INST]"
 
-    def predict(self, input_text, **kwargs):
+    def predict(self, input_text, output_logits=True, **kwargs):
         device = 'cuda' if self.device == 'auto' and torch.cuda.is_available() else self.device
         if self.wrap_syspt:
             # Wrap the input text with the system prompt
@@ -310,20 +310,23 @@ class CogBiasModel(LMMBaseModel):
             wrapped_prompt = input_text
             
         input_ids = self.tokenizer(wrapped_prompt, return_tensors="pt").input_ids.to(device)
+        if output_logits:
+            logits = self.model(input_ids=input_ids).logits
+            return logits
+        else:
+            outputs = self.model.generate(
+                input_ids,
+                max_new_tokens=self.max_new_tokens,
+                temperature=self.temperature,
+                **kwargs
+            )
 
-        outputs = self.model.generate(
-            input_ids,
-            max_new_tokens=self.max_new_tokens,
-            temperature=self.temperature,
-            **kwargs
-        )
+            out = self.tokenizer.decode(
+                outputs[0],
+                skip_special_tokens=True
+            )
 
-        out = self.tokenizer.decode(
-            outputs[0],
-            skip_special_tokens=True
-        )
-
-        return out[len(wrapped_prompt):].strip()
+            return out[len(wrapped_prompt):].strip()
 
     @torch.no_grad()
     def predict_logits(self, input_text, target_tokens=("positive", "negative")):
