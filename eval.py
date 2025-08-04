@@ -17,9 +17,14 @@ outputs = model(prompt)
 print("=== Generated Text ===")
 print(outputs)
 
-prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
-                     "Determine the emotion of the following sentence as positive or negative: {content}"
-                     ])
+
+prompt = "Sentence: I love programming!\nSentiment:"
+output = model(prompt)
+print("=>", output)
+
+# prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
+#                      "Determine the emotion of the following sentence as positive or negative: {content}"
+#                      ])
 
 # def proj_func(pred):
 #     mapping = {
