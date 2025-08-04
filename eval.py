@@ -26,7 +26,7 @@ print(generate("Once upon a time, there was a lonely dragon who"))
 
 # Example 2: Prompt with answer template (no [INST] tags)
 print("\n=== Sentiment prompt ===")
-print(generate("I love programming. Sentiment:"))
+print(generate("Classify the sentence as positive or negative: I love programming. Sentiment:"))
 
 # import torch
 # import promptbench as pb
