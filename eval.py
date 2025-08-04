@@ -52,7 +52,12 @@ for model_name in model_names:
         score = pb.Eval.compute_cls_accuracy(preds, labels)
         print(f"{score:.3f}, {prompt}")
 
-
+     # 🧹 Free memory before loading the next model
+    del model
+    del tokenizer
+    torch.cuda.empty_cache()
+    import gc
+    gc.collect()
 
 # Example 1: Plain language continuation
 # print("=== Story prompt ===")
