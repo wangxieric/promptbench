@@ -25,11 +25,13 @@ from tqdm import tqdm
 for prompt in prompts:
     preds = []
     labels = []
+    raw_preds = []
     for data in tqdm(dataset):
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
         label = data['label']
         raw_pred = model(input_text)
+        raw_preds.append(raw_pred)
         # process output
         pred = pb.OutputProcess.cls(raw_pred, proj_func)
         preds.append(pred)
@@ -37,6 +39,7 @@ for prompt in prompts:
     
     print("predictions:", preds)
     print("labels:", labels)
+    print("raw predictions:", raw_preds)
 
     # evaluate
     score = pb.Eval.compute_cls_accuracy(preds, labels)
