@@ -298,7 +298,7 @@ class CogBiasModel(LMMBaseModel):
             device = self.device
 
         # Wrap in LLaMA-style prompt if needed
-        input_text_wrapped = f"<s>[INST] <<SYS>>{self.system_prompt}<</SYS>>\n{input_text} [/INST]"
+        input_text_wrapped = f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n{input_text} [/INST]"
 
         input_ids = self.tokenizer(input_text_wrapped, return_tensors="pt").input_ids.to(device)
 
