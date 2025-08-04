@@ -6,7 +6,7 @@ dataset = pb.DatasetLoader.load_dataset("sst2")
 print("dataset loaded:", dataset[:5])
 
 model = pb.LLMModel("XiWangEric/literary-classicist-llama3", max_new_tokens=10, temperature=0.0001, device='cuda')
-prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
+prompt = "Determine the emotion of the following sentence as positive or negative: looking aristocratic , luminous yet careworn in jane hamilton 's exemplary costumes , rampling gives a performance that could not be improved upon . '"  # simple prefix prompt
 outputs = model(prompt)
 
 print("=== Generated Text ===")
@@ -31,7 +31,7 @@ for prompt in prompts:
     for data in tqdm(dataset):
         # process input
         input_text = pb.InputProcess.basic_format(prompt, data)
-        print(f"input_text: {input_text}")
+        # print(f"input_text: {input_text}")
         label = data['label']
         raw_pred = model(input_text)
         # process output
