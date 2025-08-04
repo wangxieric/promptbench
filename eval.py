@@ -34,6 +34,9 @@ for prompt in prompts:
         pred = pb.OutputProcess.cls(raw_pred, proj_func)
         preds.append(pred)
         labels.append(label)
+    
+    print("predictions:", preds)
+    print("labels:", labels)
 
     # evaluate
     score = pb.Eval.compute_cls_accuracy(preds, labels)
