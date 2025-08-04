@@ -1,28 +1,19 @@
 import torch
+import promptbench as pb
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "XiWangEric/literary-classicist-llama3"  # replace if needed
+# model_name = "XiWangEric/literary-classicist-llama3"  # replace if needed
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype=torch.float16,
-    device_map="auto"
-)
-model.eval()
+# tokenizer = AutoTokenizer.from_pretrained(model_name)
+# model = AutoModelForCausalLM.from_pretrained(
+#     model_name,
+#     torch_dtype=torch.float16,
+#     device_map="auto"
+# )
+# model.eval()
 
+model = pb.load_model("XiWangEric/literary-classicist-llama3")
 prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-
-with torch.no_grad():
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=100,
-        temperature=0.7,
-        do_sample=True,
-        top_p=0.95
-    )
-
-decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
+outputs = model(prompt)
 print("=== Generated Text ===")
-print(decoded)
+print(outputs)
