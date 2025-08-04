@@ -7,16 +7,16 @@ print("Dataset loaded:", dataset[:5])
 model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
 
 prompts = pb.Prompt([
-    "If I classify the sentence '{content}' as positive or negative, the answer will be:",
-    "The sentiment of the sentence '{content}' is clearly",
-    "Sentence: '{content}'\nSentiment:",
-    "Consider the sentence: '{content}' The sentiment is",
-    "When evaluating the sentence '{content}', one would say it is",
-    "Reading the sentence '{content}', I would label the sentiment as",
-    "After reading: '{content}', the sentiment that comes to mind is",
-    "'{content}' — this sentence expresses a",
-    "Given this sentence: '{content}', its sentiment can be described as",
-    "Let us classify the following sentence: '{content}'. It is"
+    "Classify the sentiment of the sentence '{content}' as either positive or negative: ",
+    "If I classify the sentence '{content}' as positive or negative, the answer will be: ",
+    "The sentiment of the sentence '{content}' is (positive or negative): ",
+    "Sentence: '{content}'\nSentiment (positive/negative): ",
+    "Label the following sentence as positive or negative.\nSentence: '{content}'\nLabel: ",
+    "Is the sentiment of the sentence '{content}' positive or negative? Answer: ",
+    "Given the sentence '{content}', the correct sentiment label is: ",
+    "Decide if the sentiment of '{content}' is positive or negative. It is: ",
+    "Choose the sentiment of the sentence '{content}' (positive or negative): ",
+    "The following sentence expresses a [positive/negative] sentiment: '{content}'\nAnswer: "
 ])
 
 def proj_func(pred):
