@@ -5,7 +5,7 @@ import torch
 dataset = pb.DatasetLoader.load_dataset("sst2")
 print("Dataset loaded:", dataset[:5])
 
-model_name = "XiWangEric/technical_communicator-llama3"
+model_name = "XiWangEric/business_advisor-llama3"
 model = pb.LLMModel(model_name, max_new_tokens=10, temperature=0.0001, device='cuda')
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
