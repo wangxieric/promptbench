@@ -1,23 +1,20 @@
-import torch
-import promptbench as pb
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
-dataset = pb.DatasetLoader.load_dataset("sst2")
-print("dataset loaded:", dataset[:5])
+model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", torch_dtype=torch.float16)
+model.eval()
 
-model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
-prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
-outputs = model(prompt)
+def test(prompt):
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
+    with torch.no_grad():
+        outputs = model.generate(input_ids, max_new_tokens=20)
+    result = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    print("Prompt:", prompt)
+    print("Output:", result)
+    print("---")
 
-print("=== Generated Text ===")
-print(outputs)
-
-prompt = "classify the sentiment of the following sentence: 'I love programming!'"
-outputs = model(prompt)
-print("=== Generated Text ===")
-print(outputs)
-
-print("=== Generated Text ===")
 prompts = [
     "<s>[INST] Classify the sentiment of this sentence: 'I love programming!' [/INST]",
     "<s>[INST] Classify the sentiment of this sentence: 'The movie was terrible.' [/INST]",
@@ -26,9 +23,39 @@ prompts = [
 ]
 
 for p in prompts:
-    print("Prompt:", p)
-    print("Output:", model(p))
-    print("------")
+    test(p)
+
+# import torch
+# import promptbench as pb
+# from transformers import AutoTokenizer, AutoModelForCausalLM
+
+# dataset = pb.DatasetLoader.load_dataset("sst2")
+# print("dataset loaded:", dataset[:5])
+
+# model = pb.LLMModel("meta-llama/Meta-Llama-3-8B", max_new_tokens=10, temperature=0.0001, device='cuda')
+# prompt = "Once upon a time, in a quiet village,"  # simple prefix prompt
+# outputs = model(prompt)
+
+# print("=== Generated Text ===")
+# print(outputs)
+
+# prompt = "classify the sentiment of the following sentence: 'I love programming!'"
+# outputs = model(prompt)
+# print("=== Generated Text ===")
+# print(outputs)
+
+# print("=== Generated Text ===")
+# prompts = [
+#     "<s>[INST] Classify the sentiment of this sentence: 'I love programming!' [/INST]",
+#     "<s>[INST] Classify the sentiment of this sentence: 'The movie was terrible.' [/INST]",
+#     "<s>[INST] Sentiment of 'She enjoyed every moment of the concert.'? [/INST]",
+#     "<s>[INST] Sentiment of 'I hated that book.'? [/INST]"
+# ]
+
+# for p in prompts:
+#     print("Prompt:", p)
+#     print("Output:", model(p))
+#     print("------")
 
 # prompts = pb.Prompt(["Classify the sentence as positive or negative: {content}",
 #                      "Determine the emotion of the following sentence as positive or negative: {content}"
