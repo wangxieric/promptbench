@@ -59,11 +59,3 @@ for model_name in model_names:
     torch.cuda.empty_cache()
     gc.collect()
     accelerator.free_memory()
-
-# Example 1: Plain language continuation
-# print("=== Story prompt ===")
-# print(model("Once upon a time, there was a lonely dragon who"))
-
-# # Example 2: Prompt with answer template (no [INST] tags)
-# print("\n=== Sentiment prompt ===")
-# print(model("If I classify the sentence {content} as positive or negative, the answer will be:"))
